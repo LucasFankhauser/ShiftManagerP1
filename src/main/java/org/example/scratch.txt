@@ -1,0 +1,51 @@
+private void loadSchedule()
+{
+    SwingWorker<List<Shift>, Void> worker =
+            new SwingWorker<List<Shift>, Void>() {
+
+        @Override
+        protected List<Shift> doInBackground() throws Exception
+        {
+            return loadShiftsFromDatabase();
+        }
+
+        @Override
+        protected void done()
+        {
+            try
+            {
+                List<Shift> shifts = get();
+
+                DefaultTableModel model =
+                        (DefaultTableModel) shiftTable.getModel();
+
+                model.setRowCount(0); // Remove previous rows
+
+                for (Shift shift : shifts)
+                {
+                    model.addRow(new Object[] {
+                            shift.getDate(),
+                            shift.getName(),
+                            shift.getStart(),
+                            shift.getEnd(),
+                            "" // Coworkers will be added later
+                    });
+                }
+            }
+            catch (InterruptedException e)
+            {
+                Thread.currentThread().interrupt();
+            }
+            catch (ExecutionException e)
+            {
+                JOptionPane.showMessageDialog(
+                        ManagerFrame.this,
+                        "Could not load the schedule: "
+                                + e.getCause().getMessage()
+                );
+            }
+        }
+    };
+
+    worker.execute();
+}
