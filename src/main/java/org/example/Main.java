@@ -1,5 +1,8 @@
 package org.example;
 
+import org.example.model.Employee;
+import org.example.ui.ManagerFrame;
+
 import javax.swing.SwingUtilities;
 import java.time.LocalDate;
 

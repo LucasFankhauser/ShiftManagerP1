@@ -1,4 +1,8 @@
-package org.example;
+package org.example.ui;
+''
+import org.example.model.Employee;
+import org.example.model.Shift;
+import org.example.dao.ShiftDao;
 
 import javax.swing.*;
 import java.awt.BorderLayout;

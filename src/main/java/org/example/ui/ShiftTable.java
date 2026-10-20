@@ -1,4 +1,5 @@
-package org.example;
+package org.example.ui;
+import org.example.model.Shift;
 
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;

@@ -1,4 +1,7 @@
-package org.example;
+package org.example.dao;
+
+import org.example.Database;
+import org.example.model.Shift;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
