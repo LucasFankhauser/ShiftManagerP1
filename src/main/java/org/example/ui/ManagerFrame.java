@@ -3,6 +3,7 @@ package org.example.ui;
 import org.example.model.Employee;
 import org.example.model.Shift;
 import org.example.dao.ShiftDao;
+import org.example.model.ShiftTable;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
