@@ -1,6 +1,6 @@
-package org.example.dao;
+package org.example.employee;
 
-import org.example.Database;
+import org.example.Main.Database;
 import org.example.model.Shift;
 
 import java.sql.Connection;

@@ -1,7 +1,6 @@
-package org.example;
+package org.example.Main;
 
 import org.example.model.Employee;
-import org.example.ui.ManagerFrame;
 
 import javax.swing.SwingUtilities;
 import java.time.LocalDate;
@@ -18,7 +17,7 @@ public class Main
         LocalDate startDate = LocalDate.of(2026, 9, 21);
 
         SwingUtilities.invokeLater(() -> {
-            new ManagerFrame(currentEmployee, startDate);
+            new MainFrame(currentEmployee, startDate);
         });
     }
 }

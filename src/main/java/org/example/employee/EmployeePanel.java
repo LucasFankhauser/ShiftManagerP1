@@ -1,8 +1,17 @@
-package org.example.ui;
-''
+package org.example.employee;
+
+public class EmployeePanel {
+}
+
+
+
+
+/*
+package org.example.Main;
+
 import org.example.model.Employee;
 import org.example.model.Shift;
-import org.example.dao.ShiftDao;
+import org.example.employee.ShiftDao;
 import org.example.model.ShiftTable;
 
 import javax.swing.*;
@@ -12,7 +21,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-public class ManagerFrame extends JFrame
+public class MainFrame extends JFrame
 {
     private final Employee currentEmployee;
     private final LocalDate startDate;
@@ -23,7 +32,7 @@ public class ManagerFrame extends JFrame
     private final JButton refreshButton = new JButton("Refresh");
     private final JLabel statusLabel = new JLabel(" ");
 
-    public ManagerFrame(Employee employee, LocalDate startDate)
+    public MainFrame(Employee employee, LocalDate startDate)
     {
         this.currentEmployee = employee;
         this.startDate = startDate;
@@ -95,7 +104,7 @@ public class ManagerFrame extends JFrame
                             statusLabel.setText("Could not load schedule.");
 
                             JOptionPane.showMessageDialog(
-                                    ManagerFrame.this,
+                                    MainFrame.this,
                                     "Could not load the schedule. Please try again."
                             );
                         }
@@ -109,3 +118,4 @@ public class ManagerFrame extends JFrame
         worker.execute();
     }
 }
+ */
