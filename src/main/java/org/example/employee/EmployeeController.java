@@ -1,5 +1,6 @@
 package org.example.employee;
 
+import org.example.Main.MainFrame;
 import org.example.model.Employee;
 import org.example.model.Shift;
 
@@ -9,28 +10,32 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-/** Handles employee schedule actions. Construct and call it on Swing's EDT. */
 public class EmployeeController
 {
-    private final EmployeePanel panel;
-    private final Employee currentEmployee;
-    private final LocalDate startDate;
+    private final MainFrame mainFrame;
     private final ShiftDao shiftDao = new ShiftDao();
 
-    // Accessed only on the EDT; prevents overlapping schedule loads.
+    private EmployeePanel panel;
+    private Employee currentEmployee;
+    private LocalDate startDate;
+
     private boolean loading;
 
-    public EmployeeController(
-            EmployeePanel panel,
-            Employee employee,
-            LocalDate startDate)
+    public EmployeeController(MainFrame mainFrame)
     {
-        this.panel = panel;
-        this.currentEmployee = employee;
-        this.startDate = startDate;
+        this.mainFrame = mainFrame;
+    }
 
-        panel.setEmployeeDetails(employee, startDate);
-        panel.addRefreshListener(e -> loadSchedule());
+    // Call after the employee has logged in and the panel exists.
+    public void initialize()
+    {
+        panel = mainFrame.getEmployeePanel();
+        currentEmployee = mainFrame.getCurrentEmployee();
+        startDate = LocalDate.now();
+
+        panel.setEmployeeDetails(currentEmployee, startDate);
+
+        loadSchedule();
     }
 
     public void loadSchedule()

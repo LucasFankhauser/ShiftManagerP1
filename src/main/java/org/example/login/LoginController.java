@@ -28,10 +28,7 @@ public class LoginController {
                         NewLoginPopup loginPopup = new NewLoginPopup(new NewLoginController(), (int) empData[0]);
                     }
                     break;
-                case "doctor":
-                    mainFrame.showEmployee();
-                    break;
-                case "technician":
+                case "doctor", "technician":
                     mainFrame.showEmployee();
                     break;
                 default:

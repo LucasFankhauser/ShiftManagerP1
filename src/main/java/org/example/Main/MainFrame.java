@@ -11,7 +11,7 @@ import org.example.model.Employee;
 import javax.swing.*;
 
 public class MainFrame extends JFrame {
-    // Current Loggin In Employee
+    // Current Logging In Employee
     Employee currentEmployee;
 
     // Login
@@ -33,9 +33,9 @@ public class MainFrame extends JFrame {
         loginPanel = new LoginPanel(loginController);
 
 
-        // Employee
-        //employeeController = new EmployeeController(this);
-        //employeePanel = new EmployeePanel(employeeController);
+//         Employee
+        employeeController = new EmployeeController(this);
+        employeePanel = new EmployeePanel(employeeController);
 
 
         // Admin
@@ -67,7 +67,9 @@ public class MainFrame extends JFrame {
 
     public void showEmployee() {
         System.out.println("Will show employee once implemented");
-        //showPanel(employeePanel);
+
+
+        showPanel(employeePanel);
     }
 
     public void showPanel(JPanel panel) {
@@ -77,9 +79,17 @@ public class MainFrame extends JFrame {
     }
     public void setCurrentEmployee(Employee emp) {
         currentEmployee = emp;
+        employeeController.initialize();
+
     }
 
-    public Employee getCurrentEmployee() {
+    public Employee getCurrentEmployee()
+    {
         return currentEmployee;
+    }
+
+    public EmployeePanel getEmployeePanel()
+    {
+        return employeePanel;
     }
 }

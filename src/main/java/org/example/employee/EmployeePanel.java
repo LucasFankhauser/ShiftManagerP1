@@ -18,8 +18,10 @@ public class EmployeePanel extends JPanel
     private final JLabel employeeLabel = new JLabel(" ");
     private final JLabel statusLabel = new JLabel(" ");
 
-    public EmployeePanel()
+    public EmployeePanel(EmployeeController employeeController)
     {
+
+
         setLayout(new BorderLayout());
 
         JPanel header = new JPanel(new BorderLayout());
@@ -29,6 +31,8 @@ public class EmployeePanel extends JPanel
         add(header, BorderLayout.NORTH);
         add(new JScrollPane(shiftTable), BorderLayout.CENTER);
         add(statusLabel, BorderLayout.SOUTH);
+
+        addRefreshListener(e -> employeeController.loadSchedule());
     }
 
     public void setEmployeeDetails(Employee employee, LocalDate startDate)
