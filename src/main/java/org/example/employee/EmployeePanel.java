@@ -1,121 +1,77 @@
 package org.example.employee;
 
-public class EmployeePanel {
-}
-
-
-
-
-/*
-package org.example.Main;
-
 import org.example.model.Employee;
 import org.example.model.Shift;
-import org.example.employee.ShiftDao;
 import org.example.model.ShiftTable;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
-import java.sql.SQLException;
+import java.awt.event.ActionListener;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
-public class MainFrame extends JFrame
+/** Displays employee schedule information. Database work belongs in the controller. */
+public class EmployeePanel extends JPanel
 {
-    private final Employee currentEmployee;
-    private final LocalDate startDate;
-
-    private final ShiftDao shiftDao = new ShiftDao();
     private final ShiftTable shiftTable = new ShiftTable();
-
     private final JButton refreshButton = new JButton("Refresh");
+    private final JLabel employeeLabel = new JLabel(" ");
     private final JLabel statusLabel = new JLabel(" ");
 
-    public MainFrame(Employee employee, LocalDate startDate)
+    public EmployeePanel()
     {
-        this.currentEmployee = employee;
-        this.startDate = startDate;
-
-        setTitle("Shift Manager");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(800, 600);
-        setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        JLabel employeeLabel =
-                new JLabel(currentEmployee.getDisplayName() + ": " + startDate + " through " + startDate.plusDays(14));
-
         JPanel header = new JPanel(new BorderLayout());
-
         header.add(employeeLabel, BorderLayout.WEST);
         header.add(refreshButton, BorderLayout.EAST);
 
         add(header, BorderLayout.NORTH);
         add(new JScrollPane(shiftTable), BorderLayout.CENTER);
         add(statusLabel, BorderLayout.SOUTH);
-
-        refreshButton.addActionListener(e -> loadSchedule());
-
-        setVisible(true);
-
-        loadSchedule();
     }
 
-    private void loadSchedule()
+    public void setEmployeeDetails(Employee employee, LocalDate startDate)
     {
-        refreshButton.setEnabled(false);
-        statusLabel.setText("Loading schedule...");
+        // The query excludes startDate + 14, so the last included date is + 13.
+        employeeLabel.setText(
+                employee.getDisplayName() + ": " + startDate
+                        + " through " + startDate.plusDays(13)
+        );
+    }
 
-        SwingWorker<List<Shift>, Void> worker =
-                new SwingWorker<List<Shift>, Void>()
-                {
-                    @Override
-                    protected List<Shift> doInBackground() throws SQLException
-                    {
-                        return shiftDao.findForEmployee(
-                                currentEmployee.getId(),
-                                startDate,
-                                startDate.plusDays(14)
-                        );
-                    }
+    public void addRefreshListener(ActionListener listener)
+    {
+        refreshButton.addActionListener(listener);
+    }
 
-                    @Override
-                    protected void done()
-                    {
-                        try
-                        {
-                            List<Shift> shifts = get();
+    public void setShifts(List<Shift> shifts)
+    {
+        shiftTable.setShifts(shifts);
+    }
 
-                            shiftTable.setShifts(shifts);
+    public void setLoading(boolean loading)
+    {
+        refreshButton.setEnabled(!loading);
 
-                            statusLabel.setText(
-                                    shifts.size() + " shifts found"
-                            );
-                        }
-                        catch (InterruptedException e)
-                        {
-                            Thread.currentThread().interrupt();
-                            statusLabel.setText("Schedule loading interrupted.");
-                        }
-                        catch (ExecutionException e)
-                        {
-                            e.getCause().printStackTrace();
-                            statusLabel.setText("Could not load schedule.");
+        if (loading)
+        {
+            statusLabel.setText("Loading schedule...");
+        }
+    }
 
-                            JOptionPane.showMessageDialog(
-                                    MainFrame.this,
-                                    "Could not load the schedule. Please try again."
-                            );
-                        }
-                        finally
-                        {
-                            refreshButton.setEnabled(true);
-                        }
-                    }
-                };
+    public void setStatus(String message)
+    {
+        statusLabel.setText(message);
+    }
 
-        worker.execute();
+    public void showError(String message)
+    {
+        JOptionPane.showMessageDialog(
+                this,
+                message,
+                "Schedule Error",
+                JOptionPane.ERROR_MESSAGE
+        );
     }
 }
- */
