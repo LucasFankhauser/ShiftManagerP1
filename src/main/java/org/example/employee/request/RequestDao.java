@@ -1,6 +1,7 @@
 package org.example.employee.request;
 
 import org.example.Main.Database;
+import org.example.admin.schedule.ScheduleDao;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -116,6 +117,49 @@ public class RequestDao {
             {
                 connection.rollback();
 
+                if (isRuleDenial(exception))
+                {
+                    return RequestDecision.denied(
+                            getDatabaseMessage(exception)
+                    );
+                }
+
+                throw exception;
+            }
+        }
+    }
+
+    public RequestDecision requestWork(
+            int employeeId,
+            LocalDate date,
+            int shiftTypeId
+    ) throws SQLException
+    {
+        try (Connection connection = Database.getConnection())
+        {
+            try
+            {
+                int rowsInserted = ScheduleDao.insertShift(
+                        connection,
+                        employeeId,
+                        date,
+                        shiftTypeId,
+                        true
+                );
+
+                if (rowsInserted == 1)
+                {
+                    return RequestDecision.approved(
+                            "Work request approved."
+                    );
+                }
+
+                return RequestDecision.denied(
+                        "The work request was not added."
+                );
+            }
+            catch (SQLException exception)
+            {
                 if (isRuleDenial(exception))
                 {
                     return RequestDecision.denied(

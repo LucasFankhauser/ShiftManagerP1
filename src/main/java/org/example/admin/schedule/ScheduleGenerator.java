@@ -78,11 +78,10 @@ public class ScheduleGenerator {
         do {
             Employee doctor = employees.get_doctor();
 
-            if (ScheduleDao.insert_shift(
+            if (ScheduleDao.insertGeneratedShift(
                     doctor.getId(),
                     date,
-                    shift_type,
-                    true
+                    shift_type
             )) {
                 doctor_assigned = true;
             }
@@ -109,11 +108,10 @@ public class ScheduleGenerator {
             do {
                 Employee tech = employees.get_tech();
 
-                if (ScheduleDao.insert_shift(
+                if (ScheduleDao.insertGeneratedShift(
                         tech.getId(),
                         date,
-                        shift_type,
-                        true
+                        shift_type
                 )) {
                     tech_assigned = true;
                 }

@@ -3,7 +3,6 @@ package org.example.admin.schedule;
 import org.example.Main.Database;
 import org.example.model.Employee;
 
-import javax.swing.*;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -44,61 +43,49 @@ public class ScheduleDao {
         return employees;
     }
 
-    public static boolean insert_shift(int emp, LocalDate date, int shift_type, boolean show_errors) {
-
+    public static int insertShift(
+            Connection connection,
+            int employeeId,
+            LocalDate date,
+            int shiftTypeId,
+            boolean requested
+    ) throws SQLException {
         String sql = """
-        INSERT INTO assigned_shift (employee_id, shift_date, shift_type_id)
-        VALUES (?,?,?);
-        """;
+                INSERT INTO assigned_shift (
+                    employee_id,
+                    shift_date,
+                    shift_type_id,
+                    shift_requested
+                )
+                VALUES (?, ?, ?, ?)
+                """;
 
-        try (Connection connection = Database.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, employeeId);
+            statement.setObject(2, date);
+            statement.setInt(3, shiftTypeId);
+            statement.setBoolean(4, requested);
 
-            statement.setInt(1, emp);
-            statement.setDate(2, Date.valueOf(date));
-            statement.setInt(3, shift_type);
-
-            int rowsAffected = statement.executeUpdate();
-
-            return rowsAffected > 0;
-
-        } catch (SQLException e) {
-            if (show_errors) {
-                if (show_errors) {
-
-                    if ("P0001".equals(e.getSQLState())) {
-
-                        String message = e.getMessage();
-
-                        if (e instanceof org.postgresql.util.PSQLException pgError
-                                && pgError.getServerErrorMessage() != null) {
-                            message = pgError.getServerErrorMessage().getMessage();
-                        }
-
-                        JOptionPane.showMessageDialog(
-                                null,
-                                message,
-                                "Invalid Shift",
-                                JOptionPane.ERROR_MESSAGE
-                        );
-
-                    } else {
-
-                        JOptionPane.showMessageDialog(
-                                null,
-                                "An unexpected database error occurred.",
-                                "Database Error",
-                                JOptionPane.ERROR_MESSAGE
-                        );
-
-                        e.printStackTrace();
-                    }
-                }
-
-
-            }
+            return statement.executeUpdate();
         }
-        return false;
+    }
+
+    public static boolean insertGeneratedShift(
+            int employeeId,
+            LocalDate date,
+            int shiftTypeId
+    ) {
+        try (Connection connection = Database.getConnection()) {
+            return insertShift(
+                    connection,
+                    employeeId,
+                    date,
+                    shiftTypeId,
+                    false
+            ) == 1;
+        } catch (SQLException e) {
+            return false;
+        }
     }
 
     public static void drop_all_shifts() {
