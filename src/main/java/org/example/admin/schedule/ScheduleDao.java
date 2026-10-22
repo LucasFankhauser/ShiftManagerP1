@@ -3,6 +3,7 @@ package org.example.admin.schedule;
 import org.example.Main.Database;
 import org.example.model.Employee;
 
+import javax.swing.*;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -43,7 +44,7 @@ public class ScheduleDao {
         return employees;
     }
 
-    public static boolean insert_shift(int emp, LocalDate date, int shift_type) {
+    public static boolean insert_shift(int emp, LocalDate date, int shift_type, boolean show_errors) {
 
         String sql = """
         INSERT INTO assigned_shift (employee_id, shift_date, shift_type_id)
@@ -62,8 +63,42 @@ public class ScheduleDao {
             return rowsAffected > 0;
 
         } catch (SQLException e) {
-            return false;
+            if (show_errors) {
+                if (show_errors) {
+
+                    if ("P0001".equals(e.getSQLState())) {
+
+                        String message = e.getMessage();
+
+                        if (e instanceof org.postgresql.util.PSQLException pgError
+                                && pgError.getServerErrorMessage() != null) {
+                            message = pgError.getServerErrorMessage().getMessage();
+                        }
+
+                        JOptionPane.showMessageDialog(
+                                null,
+                                message,
+                                "Invalid Shift",
+                                JOptionPane.ERROR_MESSAGE
+                        );
+
+                    } else {
+
+                        JOptionPane.showMessageDialog(
+                                null,
+                                "An unexpected database error occurred.",
+                                "Database Error",
+                                JOptionPane.ERROR_MESSAGE
+                        );
+
+                        e.printStackTrace();
+                    }
+                }
+
+
+            }
         }
+        return false;
     }
 
     public static void drop_all_shifts() {

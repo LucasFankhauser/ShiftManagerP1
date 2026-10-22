@@ -81,7 +81,8 @@ public class ScheduleGenerator {
             if (ScheduleDao.insert_shift(
                     doctor.getId(),
                     date,
-                    shift_type
+                    shift_type,
+                    true
             )) {
                 doctor_assigned = true;
             }
@@ -111,7 +112,8 @@ public class ScheduleGenerator {
                 if (ScheduleDao.insert_shift(
                         tech.getId(),
                         date,
-                        shift_type
+                        shift_type,
+                        true
                 )) {
                     tech_assigned = true;
                 }
