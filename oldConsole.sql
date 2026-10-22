@@ -145,6 +145,13 @@ BEGIN
 SELECT st.shift_start_time, st.shift_end_time INTO start_t, end_t
 FROM shift_type AS st WHERE st.shift_type_id = NEW.shift_type_id;
 
+    -- Shift type 5 is used throughout the week, but on Sundays it runs
+    -- from its normal start time until 20:00.
+    IF EXTRACT(ISODOW FROM NEW.shift_date) = 7
+        AND NEW.shift_type_id = 5 THEN
+        end_t := TIME '20:00:00';
+    END IF;
+
 
 NEW.shift_range := tsrange(
             NEW.shift_date + start_t,
