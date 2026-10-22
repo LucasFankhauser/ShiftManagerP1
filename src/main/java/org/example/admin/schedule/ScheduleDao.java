@@ -76,7 +76,7 @@ public class ScheduleDao {
             statement.executeUpdate();
 
         } catch (SQLException e) {
-            System.out.println("failed to clear aassigned shifts");
+            System.out.println("failed to clear assigned shifts");
         }
     }
 
