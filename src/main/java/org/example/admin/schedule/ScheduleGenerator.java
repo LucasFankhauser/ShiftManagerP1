@@ -65,7 +65,7 @@ public class ScheduleGenerator {
         } else {
 
             // Sunday shift: 1 doctor, 2 technicians
-            if (!fill_shift(date, employees, 4, 2, false)) {
+            if (!fill_shift(date, employees, 5, 2, false)) {
                 filled_day = false;
             }
 
