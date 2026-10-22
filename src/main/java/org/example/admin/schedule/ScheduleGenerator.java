@@ -26,12 +26,20 @@ public class ScheduleGenerator {
                 }
             }
 
-            for (LocalDate date = start; !date.isAfter(end); date = date.plusDays(1)) {
-                fill_day_priority(date, employees);
-            }
+            int index = 0;
+            while (employees.get_average_shift_count() < 4.0 && index < 15) {
+                for (LocalDate date = start; !date.isAfter(end); date = date.plusDays(1)) {
+                    fill_day_priority(date, employees);
+                }
 
-            for (LocalDate date = start; !date.isAfter(end); date = date.plusDays(1)) {
-                fill_day_extra(date, employees);
+                for (LocalDate date = start; !date.isAfter(end); date = date.plusDays(1)) {
+                    fill_day_low_priority(date, employees);
+                }
+
+                for (LocalDate date = start; !date.isAfter(end); date = date.plusDays(1)) {
+                    fill_day_extra(date, employees);
+                }
+                index += 1;
             }
 
             if (!filled_schedule) {
@@ -65,13 +73,12 @@ public class ScheduleGenerator {
 
         } else {
 
-            // Sunday shift: 1 doctor, 2 technicians
-            if (!fill_shift(date, employees, 5, 2, false)) {
+            // Sunday shift
+            if (!fill_shift(date, employees, 5, 1, false)) {
                 filled_day = false;
             }
 
-            // Overnight shift: 1 doctor, 1 technician
-            if (!fill_shift(date, employees, 6, 1, false)) {
+            if (!fill_shift(date, employees, 6, 2, false)) {
                 filled_day = false;
             }
         }
@@ -86,6 +93,16 @@ public class ScheduleGenerator {
             fill_shift(date, employees, 1, 1, true);
         }
     }
+    //Friday add evening saturday add morning
+
+    public static void fill_day_low_priority(LocalDate date, EmployeeArray employees) {
+        if (date.getDayOfWeek() != DayOfWeek.SUNDAY && date.getDayOfWeek() != DayOfWeek.SATURDAY ) {
+            fill_shift(date, employees, 1, 1, true);
+            //Not sunday or Sat add morning
+        }
+    }
+
+
 
     public static void fill_day_extra(LocalDate date, EmployeeArray employees) {
         if (date.getDayOfWeek() == DayOfWeek.SATURDAY) {
@@ -97,7 +114,6 @@ public class ScheduleGenerator {
             fill_shift(date, employees, 2, 1, true);
             fill_shift(date, employees, 4, 1, true);
         } else if (date.getDayOfWeek() != DayOfWeek.SUNDAY){
-            fill_shift(date, employees, 1, 1, true);
             fill_shift(date, employees, 2, 1, true);
             fill_shift(date, employees, 3, 1, true);
             fill_shift(date, employees, 4, 1, true);
@@ -111,9 +127,13 @@ public class ScheduleGenerator {
 
         // Assign one doctor
         Employee first_doctor = employees.get_doctor();
+        if (check_max_shifts) {
+            employees.sort_employees_by_shifts();
+        }
         boolean doctor_assigned = false;
 
         do {
+
             Employee doctor = employees.get_doctor();
             if (!check_max_shifts || employees.can_work_more(doctor)) {
                 try {
@@ -145,18 +165,18 @@ public class ScheduleGenerator {
 
             do {
                 Employee tech = employees.get_tech();
+                if (!check_max_shifts || employees.can_work_more(tech)) {
+                    try {
+                        ScheduleDao.insertShift(employees.connection, tech.getId(), date, shift_type, false
+                        );
 
-                try {
-                    ScheduleDao.insertShift(employees.connection, tech.getId(), date, shift_type, false
-                    );
+                        tech_assigned = true;
+                        employees.increment_shift_count(tech);
 
-                    tech_assigned = true;
-                    employees.increment_shift_count(tech);
-
-                } catch (SQLException e) {
-                    // Insert failed, try the next technician
+                    } catch (SQLException e) {
+                        // Insert failed, try the next technician
+                    }
                 }
-
                 employees.next_tech();
 
             } while (!tech_assigned &&

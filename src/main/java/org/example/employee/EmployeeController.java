@@ -6,7 +6,9 @@ import org.example.model.Shift;
 
 import javax.swing.SwingWorker;
 import java.sql.SQLException;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -32,6 +34,8 @@ public class EmployeeController
         panel = mainFrame.getEmployeePanel();
         currentEmployee = mainFrame.getCurrentEmployee();
         startDate = LocalDate.now();
+        startDate = LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+
 
         panel.setEmployeeDetails(currentEmployee, startDate);
 

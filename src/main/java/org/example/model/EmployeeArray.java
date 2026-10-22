@@ -2,6 +2,7 @@ package org.example.model;
 
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -48,6 +49,14 @@ public class EmployeeArray {
 
         next_doctor();
         next_tech();
+
+        for (Employee doctor : doctors) {
+            shiftCounts.put(doctor.getId(), 0);
+        }
+
+        for (Employee tech : techs) {
+            shiftCounts.put(tech.getId(), 0);
+        }
     }
 
     public Employee get_doctor() {
@@ -72,5 +81,25 @@ public class EmployeeArray {
         }
 
         current_tech = tech_iterator.next();
+    }
+
+    public void sort_employees_by_shifts() {
+        doctors.sort(Comparator.comparingInt(
+                doctor -> shiftCounts.get(doctor.getId())
+        ));
+
+        techs.sort(Comparator.comparingInt(
+                tech -> shiftCounts.get(tech.getId())
+        ));
+
+        doctor_iterator = doctors.iterator();
+        tech_iterator = techs.iterator();
+    }
+
+    public double get_average_shift_count() {
+        return shiftCounts.values().stream()
+                .mapToInt(Integer::intValue)
+                .average()
+                .orElse(0.0);
     }
 }
