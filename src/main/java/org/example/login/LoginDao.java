@@ -9,7 +9,8 @@ import java.sql.SQLException;
 
 public class LoginDao {
 
-    public static int validate_login(String username, String password) {
+    public static int validate_login(String username, String password)
+    {
 
         String sql = "SELECT login_eid FROM validate_login(?, ?);";
 

@@ -12,6 +12,12 @@ import org.example.model.Employee;
 import javax.swing.*;
 import java.time.LocalDate;
 import java.util.Date;
+import org.example.employee.request.RequestController;
+import org.example.employee.request.RequestPane;
+import org.example.model.RequestKind;
+import org.example.model.ShiftChoice;
+
+import java.util.List;
 
 public class MainFrame extends JFrame {
     // Current Logging In Employee
@@ -24,6 +30,8 @@ public class MainFrame extends JFrame {
     // Employee
     EmployeePanel employeePanel;
     EmployeeController employeeController;
+    RequestPane requestPane;
+    RequestController requestController;
 
     // Admin
     AdminPanel adminPanel;
@@ -40,12 +48,33 @@ public class MainFrame extends JFrame {
 
 //         Employee
         employeeController = new EmployeeController(this);
-        employeePanel = new EmployeePanel(employeeController);
+
+        requestPane = new RequestPane();
+
+        requestPane.setShiftChoices(List.of(
+                new ShiftChoice(1, "Early Morning"),
+                new ShiftChoice(2, "8:30 Morning"),
+                new ShiftChoice(3, "Late Doctor"),
+                new ShiftChoice(4, "Surgery"),
+                new ShiftChoice(5, "Night Shift")
+        ));
+
+        requestController = new RequestController(
+                this,
+                requestPane,
+                employeeController
+        );
+
+        employeePanel = new EmployeePanel(
+                employeeController,
+                requestPane
+        );
+
 
 
         // Admin
-        //adminController = new AdminController(this);
-        //adminPanel = new AdminPanel(adminController);
+        adminController = new AdminController(this);
+        adminPanel = new AdminPanel(adminController);
 
         setTitle("Employee Management System");
         setSize(800, 600);
@@ -66,15 +95,13 @@ public class MainFrame extends JFrame {
     }
 
     public void showAdmin() {
-        System.out.println("Will show admin once implemented");
-        //showPanel(adminPanel);
+        showPanel(adminPanel);
+        adminController.initialize();
     }
 
     public void showEmployee() {
-        System.out.println("Will show employee once implemented");
-
-
         showPanel(employeePanel);
+        employeeController.initialize();
     }
 
     public void showPanel(JPanel panel) {
@@ -84,8 +111,6 @@ public class MainFrame extends JFrame {
     }
     public void setCurrentEmployee(Employee emp) {
         currentEmployee = emp;
-        employeeController.initialize();
-
     }
 
     public Employee getCurrentEmployee()
@@ -96,5 +121,16 @@ public class MainFrame extends JFrame {
     public EmployeePanel getEmployeePanel()
     {
         return employeePanel;
+    }
+
+    public AdminPanel getAdminPanel()
+    {
+        return adminPanel;
+    }
+
+    public void logout()
+    {
+        currentEmployee = null;
+        showLogin();
     }
 }

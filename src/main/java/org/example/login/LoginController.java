@@ -6,6 +6,7 @@ import org.example.login.NewLogin.NewLoginPopup;
 import org.example.model.Employee;
 
 import javax.swing.*;
+import java.util.Arrays;
 
 public class LoginController {
     MainFrame mainFrame;
@@ -15,29 +16,73 @@ public class LoginController {
     }
 
     public boolean attempt_login(String username, char[] password) {
-        int result = LoginDao.validate_login(username, new String(password));
-        if (result == -1) {
-            JOptionPane.showMessageDialog(null, "Invalid username or password!", "Login Failed", JOptionPane.ERROR_MESSAGE);
-        } else {
+        String enteredUsername = username == null ? "" : username.trim();
+        String enteredPassword = new String(password);
+
+        try {
+            if (enteredUsername.isBlank()) {
+                JOptionPane.showMessageDialog(
+                        null,
+                        "Username cannot be blank.",
+                        "Login Failed",
+                        JOptionPane.ERROR_MESSAGE
+                );
+                return false;
+            }
+
+            int result = LoginDao.validate_login(
+                    enteredUsername, enteredPassword
+            );
+            if (result == -1) {
+                JOptionPane.showMessageDialog(null, "Invalid username or password!", "Login Failed", JOptionPane.ERROR_MESSAGE);
+                return false;
+            }
+
             Object[] empData = LoginDao.get_emp(result);
-            mainFrame.setCurrentEmployee(new Employee((int) empData[0], (String) empData[1], (String) empData[2]));
-            switch ((String) empData[2]) {
-                case "admin":
-                    mainFrame.showAdmin();
-                    if (username.equals("admin") || new String(password).equals("admin")) {
-                        NewLoginPopup loginPopup = new NewLoginPopup(new NewLoginController(), (int) empData[0]);
+            if (empData == null) {
+                JOptionPane.showMessageDialog(
+                        null, "No employee is associated with this login.",
+                        "Login Failed", JOptionPane.ERROR_MESSAGE
+                );
+                return false;
+            }
+
+            Employee employee = new Employee(
+                    (int) empData[0],
+                    (String) empData[1],
+                    (String) empData[2]
+            );
+
+            switch (employee.getTitle()) {
+                case "admin" -> {
+                    if (enteredUsername.equals("admin")
+                            && enteredPassword.equals("admin")) {
+                        new NewLoginPopup(
+                                new NewLoginController(),
+                                employee.getId(),
+                                enteredUsername
+                        );
                     }
-                    break;
-                case "doctor", "technician":
+                    mainFrame.setCurrentEmployee(employee);
+                    mainFrame.showAdmin();
+                }
+                case "doctor", "technician" -> {
+                    mainFrame.setCurrentEmployee(employee);
                     mainFrame.showEmployee();
-                    break;
-                default:
-                    System.out.println("Invalid employee title");
-                    break;
+                }
+                default -> {
+                    JOptionPane.showMessageDialog(
+                            null, "Invalid employee title.",
+                            "Login Failed", JOptionPane.ERROR_MESSAGE
+                    );
+                    return false;
+                }
             }
 
             JOptionPane.showMessageDialog(null, "Login Successful");
+            return true;
+        } finally {
+            Arrays.fill(password, '\0');
         }
-        return false;
     }
 }

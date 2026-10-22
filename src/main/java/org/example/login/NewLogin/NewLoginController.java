@@ -1,19 +1,34 @@
 package org.example.login.NewLogin;
 
+import org.example.login.LoginCredentials;
+
 import javax.swing.*;
+import java.util.Arrays;
 
 public class NewLoginController {
     boolean validateNewLogin(int emp, String username, char[] password) {
-        if (username.equals("admin") || new String(password).equals("admin")) {
-            JOptionPane.showMessageDialog(null, "Username or Password can not be admin", "Invalid Login", JOptionPane.ERROR_MESSAGE);
-            return false;
-        }
-        if (username == "" || new String(password).equals("")) {
-            JOptionPane.showMessageDialog(null, "Username or Password can not be blank", "Invalid Login", JOptionPane.ERROR_MESSAGE);
-            return false;
-        }
-
         try {
+            username = username == null ? "" : username.trim();
+            if (username.isBlank()) {
+                throw new IllegalArgumentException(
+                        "Username cannot be blank."
+                );
+            }
+
+            String newPassword = new String(password);
+
+            if (newPassword.isBlank()) {
+                throw new IllegalArgumentException(
+                        "The administrator's new password cannot be blank."
+                );
+            }
+
+            if (newPassword.equals("admin")) {
+                throw new IllegalArgumentException(
+                        "The new password cannot be admin."
+                );
+            }
+
             return NewLoginDao.create_login(
                     emp,
                     username,
@@ -41,6 +56,8 @@ public class NewLoginController {
             );
 
             return false;
+        } finally {
+            Arrays.fill(password, '\0');
         }
     }
 }

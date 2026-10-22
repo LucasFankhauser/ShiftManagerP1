@@ -4,24 +4,33 @@ import javax.swing.*;
 import java.awt.*;
 
 public class NewLoginPopup {
-    NewLoginController newLoginController;
-    int emp;
+    private final NewLoginController newLoginController;
+    private final int emp;
+    private final String currentUsername;
 
-    public NewLoginPopup(NewLoginController _newLoginController, int _emp) {
-        newLoginController = _newLoginController;
-        emp = _emp;
-        boolean res = newLogin();
-        while (res == false) {
-            res = newLogin();
+    public NewLoginPopup(
+            NewLoginController newLoginController,
+            int emp,
+            String currentUsername
+    ) {
+        this.newLoginController = newLoginController;
+        this.emp = emp;
+        this.currentUsername = currentUsername;
+
+        while (!newLogin()) {
+            // The default password must be changed before continuing.
         }
     }
 
     public boolean newLogin() {
 
-        JTextField usernameField = new JTextField(15);
+        JTextField usernameField = new JTextField(currentUsername, 15);
         JPasswordField passwordField = new JPasswordField(15);
 
-        JPanel panel = new JPanel(new GridLayout(2, 2, 5, 5));
+        JPanel panel = new JPanel(new GridLayout(3, 2, 5, 5));
+
+        panel.add(new JLabel("The default admin login must be changed."));
+        panel.add(new JLabel());
 
         panel.add(new JLabel("New Username:"));
         panel.add(usernameField);
@@ -32,7 +41,7 @@ public class NewLoginPopup {
         int result = JOptionPane.showOptionDialog(
                 null,
                 panel,
-                "Create New Login",
+                "Change Default Administrator Login",
                 JOptionPane.DEFAULT_OPTION,
                 JOptionPane.PLAIN_MESSAGE,
                 null,

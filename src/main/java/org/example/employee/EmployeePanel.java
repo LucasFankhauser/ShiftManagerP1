@@ -3,6 +3,7 @@ package org.example.employee;
 import org.example.model.Employee;
 import org.example.model.Shift;
 import org.example.model.ShiftTable;
+import org.example.employee.request.RequestPane;
 
 import javax.swing.*;
 import java.awt.BorderLayout;
@@ -18,21 +19,41 @@ public class EmployeePanel extends JPanel
     private final JLabel employeeLabel = new JLabel(" ");
     private final JLabel statusLabel = new JLabel(" ");
 
-    public EmployeePanel(EmployeeController employeeController)
+    public EmployeePanel(EmployeeController employeeController, RequestPane requestPane)
     {
-
-
         setLayout(new BorderLayout());
 
-        JPanel header = new JPanel(new BorderLayout());
+        JPanel schedulePanel = new JPanel(
+                new BorderLayout()
+        );
+
+        JPanel header = new JPanel(
+                new BorderLayout()
+        );
+
         header.add(employeeLabel, BorderLayout.WEST);
         header.add(refreshButton, BorderLayout.EAST);
 
-        add(header, BorderLayout.NORTH);
-        add(new JScrollPane(shiftTable), BorderLayout.CENTER);
-        add(statusLabel, BorderLayout.SOUTH);
+        schedulePanel.add(header, BorderLayout.NORTH);
+        schedulePanel.add(
+                new JScrollPane(shiftTable),
+                BorderLayout.CENTER
+        );
+        schedulePanel.add(
+                statusLabel,
+                BorderLayout.SOUTH
+        );
 
-        addRefreshListener(e -> employeeController.loadSchedule());
+        JTabbedPane tabs = new JTabbedPane();
+
+        tabs.addTab("Schedule", schedulePanel);
+        tabs.addTab("Requests", requestPane);
+
+        add(tabs, BorderLayout.CENTER);
+
+        addRefreshListener(
+                event -> employeeController.loadSchedule()
+        );
     }
 
     public void setEmployeeDetails(Employee employee, LocalDate startDate)

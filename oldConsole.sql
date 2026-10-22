@@ -83,6 +83,14 @@ CREATE TABLE login_data (
                             password TEXT NOT NULL
 );
 
+-- Seed the one system administrator with the required first-login credentials.
+INSERT INTO login_data (eid, username, password)
+SELECT employee_id, 'admin', 'admin'
+FROM employee
+WHERE employee_title = 'admin'
+ORDER BY employee_id
+LIMIT 1;
+
 
 CREATE OR REPLACE FUNCTION check_time_off()
     RETURNS TRIGGER AS $$
@@ -224,6 +232,79 @@ CREATE OR REPLACE TRIGGER assigned_shift_trigger
 
 
 
+SELECT * FROM employee_time_off;
+DROP TABLE employee_time_off;
+TRUNCATE TABLE employee_time_off;
 
+CREATE TABLE employee_time_off (
+                                   eto_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                                   employee_id INTEGER REFERENCES employee(employee_id),
+                                   date DATE,
+                                   type time_off
+);
+
+INSERT INTO employee_time_off(employee_id, date, type) VALUES (1,'11-5-2026','sick');
+
+-- NEW TIME OFF REQUIREMENTS
+CREATE OR REPLACE FUNCTION check_time_off()
+RETURNS TRIGGER AS $$
+DECLARE
+
+BEGIN
+    -- ALREADY HAVE TIME OFF
+    IF EXISTS (SELECT *
+               FROM employee_time_off as eto
+               WHERE eto.employee_id = NEW.employee_id
+               AND eto.eto_id is DISTINCT FROM NEW.eto_id
+               AND date_part('day', eto.date) = date_part('day', NEW.date)
+               ) THEN
+        RAISE EXCEPTION
+            'Employee already has day off';
+end if;
+    -- USED ALL VACATION DAYS
+    IF NEW.type = 'vacation' AND  (SELECT COUNT(*)
+               FROM employee_time_off AS eto
+               WHERE NEW.eto_id IS DISTINCT FROM eto.eto_id
+                 AND NEW.employee_id = eto.employee_id
+                 AND eto.type = 'vacation'
+                 AND  date_part('year', eto.date) = date_part('year', NEW.date)) >= 8
+    THEN
+        RAISE EXCEPTION
+            'Employee has already used 4 sick days';
+end if;
+
+    -- USED ALL SICK DAYS
+    IF NEW.type = 'sick' AND (SELECT COUNT(*)
+               FROM employee_time_off AS eto
+               WHERE NEW.eto_id IS DISTINCT FROM eto.eto_id
+                 AND NEW.employee_id = eto.employee_id
+                 AND eto.type = 'sick'
+                 AND  date_part('year', eto.date) = date_part('year', NEW.date)) >= 4
+        THEN
+        RAISE EXCEPTION
+            'Employee has already used 4 sick days';
+end if;
+
+    -- VACATION REQUEST TOO EARLY
+    if NEW.type = 'vacation' AND NEW.date - CURRENT_DATE <= 21 THEN
+        RAISE EXCEPTION
+        'Must ask for vacation days three weeks in advance';
+end if;
+
+    -- SICK REQUEST TOO EARLY
+    if NEW.type = 'sick' AND NEW.date - CURRENT_DATE <= 0  THEN
+        RAISE EXCEPTION
+            'Cannot ask for sick days day of';
+end if;
+
+RETURN NEW;
+end;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER time_off_trigger
+    BEFORE INSERT OR UPDATE
+                                   ON employee_time_off
+                                   FOR EACH ROW
+                                   EXECUTE FUNCTION check_time_off();
 
 
