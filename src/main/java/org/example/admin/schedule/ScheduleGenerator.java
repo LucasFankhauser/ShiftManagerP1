@@ -10,7 +10,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 
 public class ScheduleGenerator {
-    public static void generate_schedule(LocalDate start, LocalDate end) {
+    public static boolean generate_schedule(LocalDate start, LocalDate end) {
         try ( Connection connection = Database.getConnection();) {
             EmployeeArray employees = new EmployeeArray(
                     ScheduleDao.get_all_employees("doctor"),
@@ -39,6 +39,8 @@ public class ScheduleGenerator {
             } else {
                 System.out.println("Schedule filled successfully");
             }
+
+            return filled_schedule;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
