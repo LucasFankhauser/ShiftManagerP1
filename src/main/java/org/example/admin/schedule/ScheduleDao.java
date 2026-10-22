@@ -72,17 +72,20 @@ public class ScheduleDao {
 
 
 
-    public static void drop_all_shifts() {
+    public static void drop_generated_shifts(LocalDate start, LocalDate end)
+            throws SQLException {
         String sql = """
-        TRUNCATE TABLE assigned_shift;
+                DELETE FROM assigned_shift
+                WHERE shift_date >= ?
+                  AND shift_date <= ?
+                  AND shift_requested = false
         """;
 
         try (Connection connection = Database.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setObject(1, start);
+            statement.setObject(2, end);
             statement.executeUpdate();
-
-        } catch (SQLException e) {
-            System.out.println("failed to clear assigned shifts");
         }
     }
 

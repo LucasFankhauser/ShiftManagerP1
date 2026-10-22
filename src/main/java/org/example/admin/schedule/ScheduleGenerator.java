@@ -46,8 +46,9 @@ public class ScheduleGenerator {
         }
     }
 
-    public static void drop_all_shifts() {
-        ScheduleDao.drop_all_shifts();
+    public static void drop_generated_shifts(LocalDate start, LocalDate end)
+            throws SQLException {
+        ScheduleDao.drop_generated_shifts(start, end);
     }
 
     public static boolean fill_day(LocalDate date, EmployeeArray employees) {
@@ -65,7 +66,7 @@ public class ScheduleGenerator {
         } else {
 
             // Sunday shift: 1 doctor, 2 technicians
-            if (!fill_shift(date, employees, 4, 2, false)) {
+            if (!fill_shift(date, employees, 5, 2, false)) {
                 filled_day = false;
             }
 

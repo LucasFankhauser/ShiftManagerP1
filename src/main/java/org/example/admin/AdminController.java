@@ -7,7 +7,9 @@ import org.example.model.Employee;
 
 import javax.swing.SwingWorker;
 import java.sql.SQLException;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
 import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 
@@ -147,14 +149,17 @@ public class AdminController {
             return;
         }
 
-        LocalDate startDate = LocalDate.now();
-        LocalDate endDate = startDate.plusDays(13);
+        int weeksOut = panel.getWeeksOut();
+        LocalDate startDate = LocalDate.now()
+                .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+                .plusWeeks(weeksOut);
+        LocalDate endDate = startDate.plusDays(6);
         panel.setGeneratingSchedule(true);
 
         SwingWorker<Boolean, Void> worker = new SwingWorker<>() {
             @Override
             protected Boolean doInBackground() throws Exception {
-                ScheduleGenerator.drop_all_shifts();
+                ScheduleGenerator.drop_generated_shifts(startDate, endDate);
                 return ScheduleGenerator.generate_schedule(startDate, endDate);
             }
 

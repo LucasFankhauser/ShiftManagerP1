@@ -29,6 +29,9 @@ public class AdminPanel extends JPanel {
     private final JButton removeButton = new JButton("Remove selected");
     private final JButton credentialsButton = new JButton("Update login");
     private final JButton generateScheduleButton = new JButton("Generate Schedule");
+    private final JSpinner weeksOutSpinner = new JSpinner(
+            new SpinnerNumberModel(0, 0, null, 1)
+    );
     private final JButton refreshButton = new JButton("Refresh");
     private final JButton logoutButton = new JButton("Log out");
     private final JLabel statusLabel = new JLabel(" ");
@@ -41,6 +44,8 @@ public class AdminPanel extends JPanel {
         header.add(new JLabel("System administration"), BorderLayout.WEST);
 
         JPanel headerButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        headerButtons.add(new JLabel("Weeks Out:"));
+        headerButtons.add(weeksOutSpinner);
         headerButtons.add(generateScheduleButton);
         headerButtons.add(refreshButton);
         headerButtons.add(logoutButton);
@@ -227,8 +232,13 @@ public class AdminPanel extends JPanel {
         statusLabel.setText(message);
     }
 
+    public int getWeeksOut() {
+        return ((Number) weeksOutSpinner.getValue()).intValue();
+    }
+
     public void setGeneratingSchedule(boolean generating) {
         generateScheduleButton.setEnabled(!generating);
+        weeksOutSpinner.setEnabled(!generating);
         if (generating) {
             statusLabel.setText("Generating schedule...");
         }
