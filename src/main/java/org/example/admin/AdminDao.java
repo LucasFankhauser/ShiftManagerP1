@@ -25,7 +25,7 @@ public class AdminDao {
                 FROM employee AS e
                 LEFT JOIN login_data AS l ON l.eid = e.employee_id
                 WHERE e.employee_title IN ('doctor', 'technician')
-                ORDER BY e.employee_title, e.employee_name, e.employee_id
+                ORDER BY e.employee_name ASC
                 """;
 
         List<ManagedEmployee> employees = new ArrayList<>();
