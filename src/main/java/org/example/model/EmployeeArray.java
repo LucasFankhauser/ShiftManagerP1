@@ -1,9 +1,12 @@
 package org.example.model;
 
+import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 
 public class EmployeeArray {
+    public Connection connection;
     ArrayList<Employee> doctors;
     Iterator<Employee> doctor_iterator;
     Employee current_doctor;
@@ -11,6 +14,23 @@ public class EmployeeArray {
     ArrayList<Employee> techs;
     Iterator<Employee> tech_iterator;
     Employee current_tech;
+    private final HashMap<Integer, Integer> shiftCounts = new HashMap<>();
+
+    public int get_shift_count(Employee employee) {
+        return shiftCounts.getOrDefault(employee.getId(), 0);
+    }
+
+    public void increment_shift_count(Employee employee) {
+        shiftCounts.merge(employee.getId(), 1, Integer::sum);
+    }
+
+    public void reset_shift_counts() {
+        shiftCounts.clear();
+    }
+
+    public boolean can_work_more(Employee employee) {
+        return get_shift_count(employee) < 4;
+    }
 
     public EmployeeArray(ArrayList<Employee> doctors, ArrayList<Employee> techs) {
 

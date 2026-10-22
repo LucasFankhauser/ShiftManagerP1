@@ -70,33 +70,19 @@ public class ScheduleDao {
         }
     }
 
-    public static boolean insertGeneratedShift(
-            int employeeId,
-            LocalDate date,
-            int shiftTypeId
-    ) {
-        try (Connection connection = Database.getConnection()) {
-            return insertShift(
-                    connection,
-                    employeeId,
-                    date,
-                    shiftTypeId,
-                    false
-            ) == 1;
-        } catch (SQLException e) {
-            return false;
-        }
-    }
 
-    public static void drop_all_shifts() throws SQLException {
+
+    public static void drop_all_shifts() {
         String sql = """
-        DELETE FROM assigned_shift
-        WHERE shift_requested = false;
+        TRUNCATE TABLE assigned_shift;
         """;
 
         try (Connection connection = Database.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.executeUpdate();
+
+        } catch (SQLException e) {
+            System.out.println("failed to clear assigned shifts");
         }
     }
 
