@@ -2,7 +2,6 @@ package org.example.Main;
 
 import org.example.admin.AdminController;
 import org.example.admin.AdminPanel;
-import org.example.admin.schedule.ScheduleGenerator;
 import org.example.employee.EmployeeController;
 import org.example.employee.EmployeePanel;
 import org.example.login.LoginPanel;
@@ -38,9 +37,6 @@ public class MainFrame extends JFrame {
     AdminController adminController;
 
     public MainFrame() {
-//        ScheduleGenerator.drop_all_shifts();
-//        ScheduleGenerator.generate_schedule(LocalDate.of(2026, 10, 19), LocalDate.of(2026, 11, 1));
-
         // Login
         loginController = new LoginController(this);
         loginPanel = new LoginPanel(loginController);

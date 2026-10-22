@@ -3,12 +3,13 @@ package org.example.admin.schedule;
 import org.example.model.Employee;
 import org.example.model.EmployeeArray;
 
+import java.sql.SQLException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 
 public class ScheduleGenerator {
 
-    public static void generate_schedule(LocalDate start, LocalDate end) {
+    public static boolean generate_schedule(LocalDate start, LocalDate end) {
 
         EmployeeArray employees = new EmployeeArray(
                 ScheduleDao.get_all_employees("doctor"),
@@ -28,9 +29,11 @@ public class ScheduleGenerator {
         } else {
             System.out.println("Schedule filled successfully");
         }
+
+        return filled_schedule;
     }
 
-    public static void drop_all_shifts() {
+    public static void drop_all_shifts() throws SQLException {
         ScheduleDao.drop_all_shifts();
     }
 

@@ -9,13 +9,15 @@ public class Shift {
     private String name;
     private LocalTime start;
     private LocalTime end;
+    private String workingWith;
 
     public Shift(LocalDate date, String name,
-                 LocalTime start, LocalTime end) {
+                 LocalTime start, LocalTime end, String workingWith) {
         this.date = date;
         this.name = name;
         this.start = start;
         this.end = end;
+        this.workingWith = workingWith;
     }
 
     public LocalDate getDate() {
@@ -32,5 +34,9 @@ public class Shift {
 
     public LocalTime getEnd() {
         return end;
+    }
+
+    public String getWorkingWith() {
+        return workingWith;
     }
 }

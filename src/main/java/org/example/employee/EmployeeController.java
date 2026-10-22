@@ -48,16 +48,20 @@ public class EmployeeController
         loading = true;
         panel.setLoading(true);
 
-        SwingWorker<List<Shift>, Void> worker =
-                new SwingWorker<List<Shift>, Void>()
+        SwingWorker<ScheduleData, Void> worker =
+                new SwingWorker<ScheduleData, Void>()
                 {
                     @Override
-                    protected List<Shift> doInBackground() throws SQLException
+                    protected ScheduleData doInBackground() throws SQLException
                     {
-                        return shiftDao.findForEmployee(
-                                currentEmployee.getId(),
-                                startDate,
-                                startDate.plusDays(14)
+                        int employeeId = currentEmployee.getId();
+                        return new ScheduleData(
+                                shiftDao.findForEmployee(
+                                        employeeId,
+                                        startDate,
+                                        startDate.plusDays(14)
+                                ),
+                                shiftDao.findTimeOffUsage(employeeId)
                         );
                     }
 
@@ -66,9 +70,15 @@ public class EmployeeController
                     {
                         try
                         {
-                            List<Shift> shifts = get();
-                            panel.setShifts(shifts);
-                            panel.setStatus(shifts.size() + " shifts found");
+                            ScheduleData data = get();
+                            panel.setShifts(data.shifts());
+                            panel.setTimeOffUsage(
+                                    data.timeOffUsage().vacationUsed(),
+                                    data.timeOffUsage().sickUsed()
+                            );
+                            panel.setStatus(
+                                    data.shifts().size() + " shifts found"
+                            );
                         }
                         catch (InterruptedException e)
                         {
@@ -93,4 +103,14 @@ public class EmployeeController
 
         worker.execute();
     }
+
+    public void logout()
+    {
+        mainFrame.logout();
+    }
+
+    private record ScheduleData(
+            List<Shift> shifts,
+            ShiftDao.TimeOffUsage timeOffUsage
+    ) {}
 }

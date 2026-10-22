@@ -102,11 +102,15 @@ public class AdminDao {
         }
     }
 
-    public boolean updatePassword(int employeeId, String password)
+    public boolean updateCredentials(
+            int employeeId,
+            String username,
+            String password
+    )
             throws SQLException {
         String sql = """
                 UPDATE login_data
-                SET password = ?
+                SET username = ?, password = ?
                 WHERE eid = ?
                   AND EXISTS (
                       SELECT 1
@@ -118,9 +122,10 @@ public class AdminDao {
 
         try (Connection connection = Database.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, password);
-            statement.setInt(2, employeeId);
+            statement.setString(1, username);
+            statement.setString(2, password);
             statement.setInt(3, employeeId);
+            statement.setInt(4, employeeId);
             return statement.executeUpdate() == 1;
         }
     }

@@ -37,7 +37,7 @@ public class ShiftTable extends JTable
                     shift.getName(),
                     shift.getStart(),
                     shift.getEnd(),
-                    ""
+                    shift.getWorkingWith()
             });
         }
     }

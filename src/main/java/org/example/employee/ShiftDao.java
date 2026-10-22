@@ -23,7 +23,20 @@ public class ShiftDao
                 SELECT a.shift_date,
                        st.shift_name,
                        st.shift_start_time,
-                       st.shift_end_time
+                       st.shift_end_time,
+                       COALESCE((
+                           SELECT STRING_AGG(
+                               coworker.employee_name,
+                               ', ' ORDER BY coworker.employee_name
+                           )
+                           FROM assigned_shift AS partner
+                           JOIN employee AS coworker
+                             ON coworker.employee_id = partner.employee_id
+                           WHERE partner.shift_date = a.shift_date
+                             AND partner.shift_type_id = a.shift_type_id
+                             AND partner.employee_id <> a.employee_id
+                             AND coworker.employee_title = 'technician'
+                       ), '') AS working_with
                 FROM assigned_shift AS a
                 JOIN shift_type AS st
                   ON a.shift_type_id = st.shift_type_id
@@ -54,7 +67,8 @@ public class ShiftDao
                             results.getObject(
                                     "shift_start_time", LocalTime.class),
                             results.getObject(
-                                    "shift_end_time", LocalTime.class)
+                                    "shift_end_time", LocalTime.class),
+                            results.getString("working_with")
                     );
 
                     shifts.add(shift);
@@ -64,4 +78,34 @@ public class ShiftDao
 
         return shifts;
     }
+
+    public TimeOffUsage findTimeOffUsage(int employeeId)
+            throws SQLException
+    {
+        String sql = """
+                SELECT COUNT(*) FILTER (WHERE type = 'vacation') AS vacation_used,
+                       COUNT(*) FILTER (WHERE type = 'sick') AS sick_used
+                FROM employee_time_off
+                WHERE employee_id = ?
+                  AND EXTRACT(YEAR FROM date) =
+                      EXTRACT(YEAR FROM CURRENT_DATE)
+                """;
+
+        try (Connection connection = Database.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql))
+        {
+            statement.setInt(1, employeeId);
+
+            try (ResultSet results = statement.executeQuery())
+            {
+                results.next();
+                return new TimeOffUsage(
+                        results.getInt("vacation_used"),
+                        results.getInt("sick_used")
+                );
+            }
+        }
+    }
+
+    public record TimeOffUsage(int vacationUsed, int sickUsed) {}
 }

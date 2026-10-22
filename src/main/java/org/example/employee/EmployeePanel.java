@@ -16,7 +16,10 @@ public class EmployeePanel extends JPanel
 {
     private final ShiftTable shiftTable = new ShiftTable();
     private final JButton refreshButton = new JButton("Refresh");
+    private final JButton logoutButton = new JButton("Log out");
     private final JLabel employeeLabel = new JLabel(" ");
+    private final JLabel vacationDaysLabel = new JLabel("Vacation Days: 0/8");
+    private final JLabel sickDaysLabel = new JLabel("Sick Days: 0/4");
     private final JLabel statusLabel = new JLabel(" ");
 
     public EmployeePanel(EmployeeController employeeController, RequestPane requestPane)
@@ -31,8 +34,20 @@ public class EmployeePanel extends JPanel
                 new BorderLayout()
         );
 
-        header.add(employeeLabel, BorderLayout.WEST);
-        header.add(refreshButton, BorderLayout.EAST);
+        JPanel headerButtons = new JPanel();
+        headerButtons.add(refreshButton);
+        headerButtons.add(logoutButton);
+
+        JPanel employeeDetails = new JPanel();
+        employeeDetails.setLayout(
+                new BoxLayout(employeeDetails, BoxLayout.Y_AXIS)
+        );
+        employeeDetails.add(employeeLabel);
+        employeeDetails.add(vacationDaysLabel);
+        employeeDetails.add(sickDaysLabel);
+
+        header.add(employeeDetails, BorderLayout.WEST);
+        header.add(headerButtons, BorderLayout.EAST);
 
         schedulePanel.add(header, BorderLayout.NORTH);
         schedulePanel.add(
@@ -54,6 +69,9 @@ public class EmployeePanel extends JPanel
         addRefreshListener(
                 event -> employeeController.loadSchedule()
         );
+        logoutButton.addActionListener(
+                event -> employeeController.logout()
+        );
     }
 
     public void setEmployeeDetails(Employee employee, LocalDate startDate)
@@ -73,6 +91,12 @@ public class EmployeePanel extends JPanel
     public void setShifts(List<Shift> shifts)
     {
         shiftTable.setShifts(shifts);
+    }
+
+    public void setTimeOffUsage(int vacationUsed, int sickUsed)
+    {
+        vacationDaysLabel.setText("Vacation Days: " + vacationUsed + "/8");
+        sickDaysLabel.setText("Sick Days: " + sickUsed + "/4");
     }
 
     public void setLoading(boolean loading)

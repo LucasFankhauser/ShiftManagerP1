@@ -1,11 +1,15 @@
 package org.example.admin;
 
 import org.example.Main.MainFrame;
+import org.example.admin.schedule.ScheduleGenerator;
 import org.example.login.LoginCredentials;
 import org.example.model.Employee;
 
+import javax.swing.SwingWorker;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.concurrent.ExecutionException;
 
 public class AdminController {
     private final MainFrame mainFrame;
@@ -96,37 +100,100 @@ public class AdminController {
         }
     }
 
-    public void setPassword() {
+    public void setCredentials() {
         if (!requireAdmin()) {
             return;
         }
 
         Integer employeeId = panel.getSelectedEmployeeId();
         if (employeeId == null) {
-            panel.showError("Select an employee before setting a password.");
+            panel.showError("Select an employee before updating login details.");
             return;
         }
         String employeeName = panel.getSelectedEmployeeName();
 
+        String username = panel.getResetUsername().trim();
         char[] password = panel.getResetPassword();
         try {
-            // Password resets do not change the username, so validate with a
-            // harmless non-admin placeholder for the username rule.
-            LoginCredentials.validate("employee", password);
-            if (!adminDao.updatePassword(employeeId, new String(password))) {
+            if (username.isBlank()) {
+                throw new IllegalArgumentException("Username cannot be blank.");
+            }
+            if (username.equalsIgnoreCase("admin")
+                    || new String(password).equals("admin")) {
+                throw new IllegalArgumentException(
+                        "Username and password cannot be admin."
+                );
+            }
+
+            if (!adminDao.updateCredentials(
+                    employeeId, username, new String(password))) {
                 panel.showError("That employee does not have login data.");
                 return;
             }
-            panel.clearResetPassword();
+            panel.clearResetCredentials();
             loadEmployees();
-            panel.setStatus("Password updated for " + employeeName + ".");
+            panel.setStatus("Login updated for " + employeeName + ".");
         } catch (IllegalArgumentException exception) {
             panel.showError(exception.getMessage());
         } catch (SQLException exception) {
-            panel.showError("Could not set password: " + databaseMessage(exception));
+            panel.showError("Could not update login: " + databaseMessage(exception));
         } finally {
             Arrays.fill(password, '\0');
         }
+    }
+
+    public void generateSchedule() {
+        if (!requireAdmin()) {
+            return;
+        }
+
+        LocalDate startDate = LocalDate.now();
+        LocalDate endDate = startDate.plusDays(13);
+        panel.setGeneratingSchedule(true);
+
+        SwingWorker<Boolean, Void> worker = new SwingWorker<>() {
+            @Override
+            protected Boolean doInBackground() throws Exception {
+                ScheduleGenerator.drop_all_shifts();
+                return ScheduleGenerator.generate_schedule(startDate, endDate);
+            }
+
+            @Override
+            protected void done() {
+                String errorMessage = null;
+
+                try {
+                    if (get()) {
+                        panel.setStatus(
+                                "Schedule generated for " + startDate
+                                        + " through " + endDate + "."
+                        );
+                    } else {
+                        panel.setStatus(
+                                "Schedule generation finished, but some shifts "
+                                        + "could not be filled."
+                        );
+                    }
+                } catch (InterruptedException exception) {
+                    Thread.currentThread().interrupt();
+                    errorMessage = "Schedule generation was interrupted.";
+                } catch (ExecutionException exception) {
+                    Throwable cause = exception.getCause();
+                    errorMessage = "Could not generate schedule: "
+                            + (cause == null
+                            ? exception.getMessage()
+                            : cause.getMessage());
+                } finally {
+                    panel.setGeneratingSchedule(false);
+                }
+
+                if (errorMessage != null) {
+                    panel.showError(errorMessage);
+                }
+            }
+        };
+
+        worker.execute();
     }
 
     public void logout() {

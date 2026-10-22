@@ -22,11 +22,13 @@ public class AdminPanel extends JPanel {
     );
     private final JTextField usernameField = new JTextField(14);
     private final JPasswordField passwordField = new JPasswordField(14);
+    private final JTextField resetUsernameField = new JTextField(14);
     private final JPasswordField resetPasswordField = new JPasswordField(14);
 
     private final JButton createButton = new JButton("Create employee");
     private final JButton removeButton = new JButton("Remove selected");
-    private final JButton passwordButton = new JButton("Set password");
+    private final JButton credentialsButton = new JButton("Update login");
+    private final JButton generateScheduleButton = new JButton("Generate Schedule");
     private final JButton refreshButton = new JButton("Refresh");
     private final JButton logoutButton = new JButton("Log out");
     private final JLabel statusLabel = new JLabel(" ");
@@ -39,6 +41,7 @@ public class AdminPanel extends JPanel {
         header.add(new JLabel("System administration"), BorderLayout.WEST);
 
         JPanel headerButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        headerButtons.add(generateScheduleButton);
         headerButtons.add(refreshButton);
         headerButtons.add(logoutButton);
         header.add(headerButtons, BorderLayout.EAST);
@@ -51,16 +54,25 @@ public class AdminPanel extends JPanel {
         forms.setLayout(new BoxLayout(forms, BoxLayout.Y_AXIS));
         forms.add(createForm());
         forms.add(Box.createVerticalStrut(8));
-        forms.add(passwordForm());
+        forms.add(credentialsForm());
         forms.add(Box.createVerticalStrut(5));
         forms.add(statusLabel);
         add(forms, BorderLayout.SOUTH);
 
         createButton.addActionListener(event -> controller.createEmployee());
         removeButton.addActionListener(event -> controller.removeSelected());
-        passwordButton.addActionListener(event -> controller.setPassword());
+        credentialsButton.addActionListener(event -> controller.setCredentials());
+        generateScheduleButton.addActionListener(event -> controller.generateSchedule());
         refreshButton.addActionListener(event -> controller.loadEmployees());
         logoutButton.addActionListener(event -> controller.logout());
+
+        employeeTable.getSelectionModel().addListSelectionListener(event -> {
+            if (!event.getValueIsAdjusting()) {
+                String username = getSelectedUsername();
+                resetUsernameField.setText(username == null ? "" : username);
+                resetPasswordField.setText("");
+            }
+        });
     }
 
     private JPanel createForm() {
@@ -135,14 +147,16 @@ public class AdminPanel extends JPanel {
         return panel;
     }
 
-    private JPanel passwordForm() {
+    private JPanel credentialsForm() {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         panel.setBorder(BorderFactory.createTitledBorder(
-                "Set password for selected employee"
+                "Update login for selected employee"
         ));
+        panel.add(new JLabel("New username:"));
+        panel.add(resetUsernameField);
         panel.add(new JLabel("New password:"));
         panel.add(resetPasswordField);
-        panel.add(passwordButton);
+        panel.add(credentialsButton);
         return panel;
     }
 
@@ -166,6 +180,10 @@ public class AdminPanel extends JPanel {
         return resetPasswordField.getPassword();
     }
 
+    public String getResetUsername() {
+        return resetUsernameField.getText();
+    }
+
     public Integer getSelectedEmployeeId() {
         int row = employeeTable.getSelectedRow();
         return row < 0 ? null : (Integer) tableModel.getValueAt(row, 0);
@@ -174,6 +192,11 @@ public class AdminPanel extends JPanel {
     public String getSelectedEmployeeName() {
         int row = employeeTable.getSelectedRow();
         return row < 0 ? null : (String) tableModel.getValueAt(row, 1);
+    }
+
+    public String getSelectedUsername() {
+        int row = employeeTable.getSelectedRow();
+        return row < 0 ? null : (String) tableModel.getValueAt(row, 3);
     }
 
     public void setEmployees(List<AdminDao.ManagedEmployee> employees) {
@@ -195,12 +218,20 @@ public class AdminPanel extends JPanel {
         passwordField.setText("");
     }
 
-    public void clearResetPassword() {
+    public void clearResetCredentials() {
+        resetUsernameField.setText("");
         resetPasswordField.setText("");
     }
 
     public void setStatus(String message) {
         statusLabel.setText(message);
+    }
+
+    public void setGeneratingSchedule(boolean generating) {
+        generateScheduleButton.setEnabled(!generating);
+        if (generating) {
+            statusLabel.setText("Generating schedule...");
+        }
     }
 
     public void showError(String message) {
