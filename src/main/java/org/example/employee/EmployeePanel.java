@@ -79,7 +79,7 @@ public class EmployeePanel extends JPanel
         // The query excludes startDate + 14, so the last included date is + 13.
         employeeLabel.setText(
                 employee.getDisplayName() + ": " + startDate
-                        + " through " + startDate.plusDays(13)
+                        + " through " + startDate.plusDays(14)
         );
     }
 
